@@ -106,7 +106,6 @@ public class Filter implements Map<String, String> {
         try {
             Arrays.stream(tokens).forEach(t -> {
                 String[] vals = t.split("=");
-
                 m.put(vals[0], vals[1]);
             });
         } catch (Exception e) {

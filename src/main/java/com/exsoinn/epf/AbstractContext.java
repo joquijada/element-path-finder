@@ -106,7 +106,7 @@ abstract class AbstractContext implements Context {
                     int aryIdx =
                             Integer.parseInt(
                                     curNodeInPath.substring(curNodeInPath.indexOf('[') + 1, curNodeInPath.indexOf(']')));
-                    Context curAryElemVal = entryFromArray(aryIdx);
+                    Context curAryElemVal = curElemVal.entryFromArray(aryIdx);
                     if (curAryElemVal.isRecursible()) {
                         shouldRecurse = true;
                         elemToRecurseInto = curAryElemVal;

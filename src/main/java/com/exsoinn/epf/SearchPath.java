@@ -11,56 +11,54 @@ public class SearchPath implements List<String> {
     private final int currentNodeIndex;
     private final boolean atEndOfSearchPath;
 
-    private SearchPath(String pSearchPath, int pNodeIdx) {
-        searchPath = parseElementSearchPath(pSearchPath);
+
+
+    SearchPath(String pSearchPath, int pNodeIdx, boolean pAtEnd) {
+        if (pNodeIdx < 0 && pAtEnd) {
+            searchPath = Collections.emptyList();
+        } else {
+            searchPath = parseElementSearchPath(pSearchPath);
+        }
         searchPathAsString = pSearchPath;
         currentNodeIndex = pNodeIdx;
-        atEndOfSearchPath = false;
+        atEndOfSearchPath = pAtEnd;
     }
 
-    private SearchPath(String pSearchPath) {
-        searchPath = Collections.EMPTY_LIST;
+    /*SearchPath(String pSearchPath) {
+        searchPath = Collections.emptyList();
         currentNodeIndex = -1;
         atEndOfSearchPath = true;
         searchPathAsString = pSearchPath;
+    }*/
+
+
+    static SearchPath valueOf(final String pSearchPath) {
+        return new SearchPath(pSearchPath, -1, false);
     }
 
-
-    public static SearchPath valueOf(final String pSearchPath) {
-        return new SearchPath(pSearchPath, -1);
-    }
-
-    public final SearchPath advanceToNextNode() {
+    final SearchPath advanceToNextNode() {
         /*
-         * We're already at last node (I.e. the search path has already been traversed), advancing will just construct
-         * an empty list SearchPath
+         * If this go around is advancing to the last node in search path, set "atEndOfSearchPath"
+         * to true. If we've already advanced to last node, and are trying to advance again, in addition set
+         * current index to -1.
          */
-        if (searchPath.size() == currentNodeIndex) {
-            return new SearchPath(searchPathAsString);
-        }
-        return new SearchPath(searchPathAsString, currentNodeIndex+1);
+        int nextNodeIdx = currentNodeIndex + 1;
+        return new SearchPath(searchPathAsString,
+                nextNodeIdx <= searchPath.size()-1 ? nextNodeIdx : -1, (nextNodeIdx >= searchPath.size()-1));
     }
 
-    public final String currentNode() {
+    final String currentNode() {
         return get(currentNodeIndex);
-    }
-
-    public final int currentNodeIndex() {
-        return currentNodeIndex;
-    }
-
-    public final boolean atEndOfSearchPath() {
-        return false;
     }
 
     @Override
     public int size() {
-        return 0;
+        return searchPath.size();
     }
 
     @Override
     public boolean isEmpty() {
-        return false;
+        return searchPath.isEmpty();
     }
 
     @Override
@@ -74,8 +72,8 @@ public class SearchPath implements List<String> {
     }
 
     @Override
-    public String[] toArray() {
-        return (String[]) searchPath.toArray();
+    public Object[] toArray() {
+        return searchPath.toArray();
     }
 
     @Override
@@ -172,21 +170,32 @@ public class SearchPath implements List<String> {
     /**
      * Express the search path as a dot separated {@link String} of tokens, which was the original
      * format provided when this {@code SearchPath} instance was constructed.
-     * @return
+     * @return - Search path string
      */
     @Override
     public String toString() {
         return searchPathAsString;
+        //return searchPath.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return searchPath.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return searchPath.hashCode();
     }
 
     private static List<String> parseElementSearchPath(String pElemSearchPath) {
         String[] nodes = pElemSearchPath.split("\\.");
-        List<String> l = new ArrayList<>();
+        List<String> l = new ArrayList<>(nodes.length);
         Arrays.stream(nodes).forEach(e -> l.add(e));
         return l;
     }
 
-    public boolean isAtEndOfSearchPath() {
+    boolean isAtEndOfSearchPath() {
         return atEndOfSearchPath;
     }
 }

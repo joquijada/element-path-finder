@@ -117,7 +117,7 @@ class JsonContext extends AbstractContext {
                  * on primitive values, therefore assume that the found element will be a single name value pair.
                  * If the path of the filter element is not found, IllegalArgumentException is thrown.
                  */
-                SearchPath elemSearchPath =SearchPath.valueOf(filterEntry.getKey());
+                SearchPath elemSearchPath = SearchPath.valueOf(filterEntry.getKey());
                 if (!pElem.containsElement(elemSearchPath.get(0))) {
                     return true;
                 }
@@ -154,7 +154,7 @@ class JsonContext extends AbstractContext {
         Set<Map.Entry<String, Context>> ents = pElem.entrySet();
         JsonObject jo = new JsonObject();
         ents.stream().filter(entry -> pTargetElems.contains(entry.getKey()))
-                .forEach(entry -> jo.add(entry.getKey(), ((JsonContext) entry).unwrap()));
+                .forEach(entry -> jo.add(entry.getKey(), ((JsonContext) entry.getValue()).unwrap()));
         return new JsonContext(jo);
     }
 
