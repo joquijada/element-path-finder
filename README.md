@@ -1,6 +1,6 @@
 # element-path-finder
 
-# Provide thesame API for disparate data formats
+# Consistent API for searching disparate data formats
 
 By leveraging the Adapter design pattern in Java, this project makes it possible to decouple a client from the underlying format of the read-only data it wishes search on.  All accesses to data are read-only. The calling code will have the data in raw format, and obtain the wrapper that makes the common interface possible, by invoking factory method ContextFactory.INSTANCE.obtainContext(<raw data>), which in turns on a 3rd party API to handle the data format in question to provide implementations for the various operations that interface "com.exsoinn.epf.Context" provides.
 
