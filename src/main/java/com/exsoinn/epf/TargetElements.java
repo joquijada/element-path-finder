@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
  */
 public class TargetElements implements Set<String> {
     private final Set<String> list;
-    private final static Map<String, TargetElements> cachedLists = new ConcurrentHashMap();
+    private final static Map<String, TargetElements> cachedLists = new ConcurrentHashMap<>();
 
     private TargetElements(String pTargetElems) {
         list = parseTargetElements(pTargetElems);

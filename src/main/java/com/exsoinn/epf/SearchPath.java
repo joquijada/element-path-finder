@@ -1,6 +1,7 @@
 package com.exsoinn.epf;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by QuijadaJ on 5/3/2017.
@@ -10,8 +11,21 @@ public class SearchPath implements List<String> {
     private final String searchPathAsString;
     private final int currentNodeIndex;
     private final boolean atEndOfSearchPath;
+    private static final String KEY_SEP = "__";
+    private static final int INIT_SP = -1;
+    private final static Map<String, SearchPath> cachedSearchPaths = new ConcurrentHashMap<>();
 
 
+
+    static String generateCacheKey(String pSearchPath, int pIdx, boolean pAtEnd) {
+        StringBuilder key = new StringBuilder();
+        key.append(pSearchPath);
+        key.append(KEY_SEP);
+        key.append(pIdx);
+        key.append(KEY_SEP);
+        key.append(pAtEnd);
+        return key.toString();
+    }
 
     SearchPath(String pSearchPath, int pNodeIdx, boolean pAtEnd) {
         if (pNodeIdx < 0 && pAtEnd) {
@@ -27,7 +41,16 @@ public class SearchPath implements List<String> {
 
 
     public static SearchPath valueOf(final String pSearchPath) {
-        return new SearchPath(pSearchPath, -1, false);
+        final boolean atEnd = false;
+        String key = generateCacheKey(pSearchPath, INIT_SP, atEnd);
+        SearchPath sp = cachedSearchPaths.get(key);
+        if (null == sp) {
+            sp = new SearchPath(pSearchPath, INIT_SP, atEnd);
+            SearchPath spFromCache = cachedSearchPaths.putIfAbsent(key, sp);
+            sp = (null == spFromCache) ? sp : spFromCache;
+        }
+
+        return sp;
     }
 
     final SearchPath advanceToNextNode() {
@@ -36,9 +59,17 @@ public class SearchPath implements List<String> {
          * to true. If we've already advanced to last node, and are trying to advance again, in addition set
          * current index to -1.
          */
-        int nextNodeIdx = currentNodeIndex + 1;
-        return new SearchPath(searchPathAsString,
-                nextNodeIdx <= searchPath.size()-1 ? nextNodeIdx : -1, (nextNodeIdx >= searchPath.size()-1));
+        int nextNodeIdx = (currentNodeIndex + 1) <= searchPath.size()-1 ? (currentNodeIndex + 1) : -1 ;
+        boolean atEnd = nextNodeIdx >= searchPath.size()-1;
+
+        String key = generateCacheKey(searchPathAsString, nextNodeIdx, atEnd);
+        SearchPath sp = cachedSearchPaths.get(key);
+        if (null == sp) {
+            sp = new SearchPath(searchPathAsString, nextNodeIdx, atEnd);
+            SearchPath spFromCache = cachedSearchPaths.putIfAbsent(key, sp);
+            sp = (null == spFromCache) ? sp : spFromCache;
+        }
+        return sp;
     }
 
     final String currentNode() {
