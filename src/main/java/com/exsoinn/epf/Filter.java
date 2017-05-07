@@ -33,6 +33,24 @@ public class Filter implements Map<String, String> {
         return new Filter(pFilter);
     }
 
+
+    public static Filter fromMap(Map<String, String> pFilterMap) {
+        if (null == pFilterMap) {
+            return null;
+        }
+        Set<Map.Entry<String, String>> entries = pFilterMap.entrySet();
+        StringBuilder sb = new StringBuilder();
+        entries.forEach(e -> {
+            sb.append(e.getKey());
+            sb.append("=");
+            sb.append(e.getValue());
+            sb.append(";");
+        });
+
+        sb.deleteCharAt(sb.length()-1);
+        return Filter.valueOf(sb.toString());
+    }
+
     @Override
     public int size() {
         return m.size();

@@ -24,15 +24,9 @@ public class SearchPath implements List<String> {
         atEndOfSearchPath = pAtEnd;
     }
 
-    /*SearchPath(String pSearchPath) {
-        searchPath = Collections.emptyList();
-        currentNodeIndex = -1;
-        atEndOfSearchPath = true;
-        searchPathAsString = pSearchPath;
-    }*/
 
 
-    static SearchPath valueOf(final String pSearchPath) {
+    public static SearchPath valueOf(final String pSearchPath) {
         return new SearchPath(pSearchPath, -1, false);
     }
 

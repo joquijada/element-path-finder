@@ -44,7 +44,15 @@ class JsonContext extends AbstractContext {
 
     @Override
     public String stringRepresentation() {
-        return je.getAsString();
+        /*
+         * The Google JSOn API says that this operation will not work for all element types,
+         * therefore to make our lives easier, silently catch problems if any, and resort to using toString().
+         */
+        try {
+            return je.getAsString();
+        } catch (Exception e) {
+            return je.toString();
+        }
     }
 
 

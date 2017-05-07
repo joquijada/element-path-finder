@@ -2,6 +2,7 @@ package com.exsoinn.epf;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Created by QuijadaJ on 5/3/2017.
@@ -28,6 +29,13 @@ public class TargetElements implements Set<String> {
         }
 
         return cachedList;
+    }
+
+    public static TargetElements fromSet(Set<String> pTargetElems) {
+        if (null == pTargetElems) {
+            return null;
+        }
+        return TargetElements.valueOf(pTargetElems.parallelStream().collect(Collectors.joining(",")));
     }
 
 
