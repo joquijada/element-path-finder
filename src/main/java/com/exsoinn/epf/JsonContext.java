@@ -168,24 +168,27 @@ class JsonContext extends AbstractContext {
 
     /*
      *
-     * When the search results is a JSON object that contain just one name/value pair, and in case of arrays
+     * When the search results is a JSON object that contains just one name/value pair, and in case of arrays
      * only one JSON object with only one name/value pair, *and* the sole element name is in the pTargetElems Set, *and*
      * the value is a JSON primitive then the search results Map gets cleared, and this single name/value pair stored in results.
      * This was done to remove burden from client, to make it convenient for them where they can just blindly get
      * the key and value as-is from the search results map.
      */
     @Override
-    void handleSingleValueFound(Map<String, String> pSearchRes,
-                                                      Set<String> pTargetElems) {
-        Set<Map.Entry<String, String>> entries = pSearchRes.entrySet();
-        if (entries.size() != 1) {
+    void handleSingleComplexObjectFound(Map<String, String> pSearchRes,
+                                Set<String> pTargetElems) {
+        if (null == pTargetElems || pTargetElems.isEmpty()) {
             return;
         }
-
-        String val = entries.iterator().next().getValue();
-        JsonParser jsonParser = new JsonParser();
-
         try {
+            JsonParser jsonParser = new JsonParser();
+            Set<Map.Entry<String, String>> entries = pSearchRes.entrySet();
+            if (entries.size() != 1) {
+                return;
+            }
+
+            String val = entries.iterator().next().getValue();
+
             final JsonElement elem = jsonParser.parse(val);
             JsonObject jo = null;
             if (elem.isJsonArray() && elem.getAsJsonArray().size() == 1) {
@@ -200,10 +203,13 @@ class JsonContext extends AbstractContext {
             }
 
             if (null != jo) {
-                Map.Entry<String, JsonElement> entry = jo.entrySet().iterator().next();
-                if (null != pTargetElems && pTargetElems.contains(entry.getKey()) && entry.getValue().isJsonPrimitive()) {
-                    pSearchRes.clear();
-                    pSearchRes.put(entry.getKey(), entry.getValue().getAsString());
+                pSearchRes.clear();
+                Set<Map.Entry<String,JsonElement>> joEntSet = jo.entrySet();
+                //Map.Entry<String, JsonElement> entry = jo.entrySet().iterator().next();
+                for (Map.Entry<String,JsonElement> entry : joEntSet) {
+                    if (null != pTargetElems && pTargetElems.contains(entry.getKey()) && entry.getValue().isJsonPrimitive()) {
+                        pSearchRes.put(entry.getKey(), entry.getValue().getAsString());
+                    }
                 }
             }
         } catch (Exception e) {

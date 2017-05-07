@@ -31,7 +31,6 @@ public class ContextTest {
     private static final Context context = ContextFactory.INSTANCE.obtainContext(jsonStr);
     private static final JsonParser jsonParser = new JsonParser();
 
-    //private static final JsonParser jsonParser = new JsonParser();
 
     @Test
     public void obtainJsonContext() {

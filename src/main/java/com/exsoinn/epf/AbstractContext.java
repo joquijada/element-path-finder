@@ -7,6 +7,39 @@ import java.util.*;
  * Created by QuijadaJ on 5/4/2017.
  */
 abstract class AbstractContext implements Context {
+    /**
+     * Via externally configurable arguments, this method will search a {@link Context} structure for the
+     * elements specified. If found, the results are returned as name/value pairs for each
+     * of the elements that the caller was searching for.
+     * The {@link Context} object off of which this method can be invoked, was previously obtained via a call to factory
+     * method {@link ContextFactory#obtainContext(Object)}.
+     * The main idea here is to keep client code decoupled from the underlying format of the data, be it JSON, XML and
+     * the link. The only coupling/contract is done via input arguments, to modify the behavior of this method.
+     * The only pain point is that the input parameters must be properly configured before this method gets invoked,
+     * but that's a small price to pay in comparison to the maintainability and re-usability that is gained by externally
+     * configuring things in this way.
+     *
+     * @param pSearchPath - A SearchPath object that was constructed vya {@link SearchPath#valueOf(String)}. If an array element will be
+     *                    encountered somewhere in the search path, then the corresponding node should contain square
+     *                    brackets like this: someElemName[0]. If an array element is encountered yet the path
+     *                    did not tell this method to expect an array at this point (by appending "[N]" to the
+     *                    path node), IllegalArgumentException is thrown, *unless* the array element happens to be the
+     *                    last node of the search path.
+     * @param pFilter - A {@link Filter} which will be applied in all-or-nothing fashion to select a data node that matches
+     *                *all* of the name/value pairs contained in {@param pFilter}. The key in the {@param pFilter} corresponds
+     *                to a member in te underlying {@link Context}, and the value corresponds to what the value
+     *                should be in order for that node to be included in the search results. {@param pFilter} applies only
+     *                to complex (I.e. non-primitive} data types only of the underlying data object that the {@link Context}
+     *                being searched encapsulates
+     * @param pTargetElements - This argument is nothing but a {@link java.util.Set} that gets applied to the last node in
+     *                        the search of element names that should be included in the results.
+     *                        It gets applied only to found complex elements whether those complex elements be inside or outside of an array.
+     * @return - Map of {@link SearchResult} object that contains name/value pairs found as per the {@param pElemPath},
+     *           where name is the element name found, and value is the value of such element. The
+     *           values returned will all be in string format.
+     * @throws IllegalArgumentException - Thrown if any of the input parameters are deemed incorrect.
+     *
+     */
     @Override
     public SearchResult findElement(SearchPath pSearchPath,
                                     Filter pFilter,
@@ -195,14 +228,42 @@ abstract class AbstractContext implements Context {
              * array structure. Re-visit.
              */
             pFoundElemVals.put(pElemName, elemVal.toString());
-            handleSingleValueFound(pFoundElemVals, pTargetElements);
+            handleSingleComplexObjectFound(pFoundElemVals, pTargetElements);
         }
     }
 
+    /**
+     * This method should be implemented by child classes to handle {@link TargetElements}, to exclude
+     * elements not contain therein
+     * @param pElem
+     * @param pTargetElems
+     * @return
+     */
     abstract Context filterUnwantedElements(Context pElem, TargetElements pTargetElems);
 
-    abstract void handleSingleValueFound(Map<String, String> pSearchRes, Set<String> pTargetElems);
 
+    /**
+     * This method is applicable only when a {@link TargetElements} has been passed by the calling code, and when the
+     * data found in the last node of search path is a single complex object, or if it's list like object with a single complex
+     * object as member. It should take the name/value pairs of the complex object and store them in passed in
+     * {@param pSearchResult} {@link Map}. The idea here is to make it convenient for client code to access these members
+     * of the complex object without any additional processing, effectively shifting that burden onto this API.
+     *
+     * @param pSearchRes
+     * @param pTargetElems
+     */
+    abstract void handleSingleComplexObjectFound(Map<String, String> pSearchRes, Set<String> pTargetElems);
+
+
+    /**
+     * The implementation of this method provided by child classes should provide data format specific logic to
+     * handle {@link Filter} <code>pFilter</code> param. The {@link Filter} is to be applied once the last node of
+     * the search path is located, and the node is an array of complex objects, to filter out nodes not wanted in the
+     * final search results.
+     * @param pElem
+     * @param pFilter
+     * @return
+     */
     abstract boolean shouldExcludeFromResults(Context pElem, Filter pFilter);
 
 }
