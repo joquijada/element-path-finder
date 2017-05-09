@@ -106,50 +106,6 @@ class JsonContext extends AbstractContext {
 
 
 
-    @Override
-    boolean shouldExcludeFromResults(Context pElem, Filter pFilter)
-            throws IllegalArgumentException {
-        if (null == pFilter) {
-            return false;
-        }
-
-        Set<Map.Entry<String, String>> filterEntries = pFilter.entrySet();
-        for (Map.Entry<String, String> filterEntry : filterEntries) {
-            boolean elemToFilterOnIsNested = filterEntry.getKey().indexOf('.') >= 0;
-
-            if (elemToFilterOnIsNested) {
-                /*
-                 * Handles case when the value we want to filter on is buried one or more levels deeper than found the
-                 * found element.
-                 * We leverage findElement(), which accepts a dot (.) separated element search path. Also, we support only filtering
-                 * on primitive values, therefore assume that the found element will be a single name value pair.
-                 * If the path of the filter element is not found, IllegalArgumentException is thrown.
-                 */
-                SearchPath elemSearchPath = SearchPath.valueOf(filterEntry.getKey());
-                if (!pElem.containsElement(elemSearchPath.get(0))) {
-                    return true;
-                }
-                Map<String, String> filterElemFound = findElement(pElem, elemSearchPath, null, null, null, null);
-                Set<Map.Entry<String, String>> entries = filterElemFound.entrySet();
-                String filterVal = entries.iterator().next().getValue();
-                if (null == filterVal) {
-                    throw new IllegalArgumentException("The filter element value specified was not found off of this node: " +
-                            filterEntry.getKey());
-                }
-
-                if (!filterVal.equals(filterEntry.getValue())) {
-                    return true;
-                }
-            } else {
-                Context elem = pElem.memberValue(filterEntry.getKey());
-                if (null != elem && !elem.toString().equals(filterEntry.getValue())) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     /*
      * Gets rid of elements in the result set that the caller did not request via pTargetElements
      */
@@ -175,40 +131,38 @@ class JsonContext extends AbstractContext {
      * the key and value as-is from the search results map.
      */
     @Override
-    void handleSingleComplexObjectFound(Map<String, String> pSearchRes,
+    void handleSingleComplexObjectFound(Map<String, Context> pSearchRes,
                                 Set<String> pTargetElems) {
         if (null == pTargetElems || pTargetElems.isEmpty()) {
             return;
         }
         try {
-            JsonParser jsonParser = new JsonParser();
-            Set<Map.Entry<String, String>> entries = pSearchRes.entrySet();
+            Set<Map.Entry<String, Context>> entries = pSearchRes.entrySet();
             if (entries.size() != 1) {
                 return;
             }
 
-            String val = entries.iterator().next().getValue();
-
-            final JsonElement elem = jsonParser.parse(val);
-            JsonObject jo = null;
-            if (elem.isJsonArray() && elem.getAsJsonArray().size() == 1) {
-                JsonElement aryElem = elem.getAsJsonArray().iterator().next();
-                if (aryElem.isJsonObject()) {
-                    jo = (JsonObject) aryElem;
+            final Context elem = entries.iterator().next().getValue();
+            Context ctx = null;
+            if (elem.isArray() && elem.asArray().size() == 1) {
+                Context aryElem = elem.asArray().iterator().next();
+                if (aryElem.isRecursible()) {
+                    ctx = aryElem;
                 }
-            } else if (elem.isJsonObject() && elem.getAsJsonObject().entrySet().size() == 1) {
-                jo = (JsonObject) elem;
+            } else if (elem.isRecursible() && elem.entrySet().size() == 1) {
+                ctx = elem;
             } else {
                 return;
             }
 
-            if (null != jo) {
+            if (null != ctx) {
                 pSearchRes.clear();
-                Set<Map.Entry<String,JsonElement>> joEntSet = jo.entrySet();
-                //Map.Entry<String, JsonElement> entry = jo.entrySet().iterator().next();
-                for (Map.Entry<String,JsonElement> entry : joEntSet) {
-                    if (null != pTargetElems && pTargetElems.contains(entry.getKey()) && entry.getValue().isJsonPrimitive()) {
-                        pSearchRes.put(entry.getKey(), entry.getValue().getAsString());
+                Set<Map.Entry<String, Context>> ctxEntSet = ctx.entrySet();
+
+                for (Map.Entry<String, Context> entry : ctxEntSet) {
+                    if (null != pTargetElems && pTargetElems.contains(entry.getKey())
+                            && entry.getValue().isPrimitive()) {
+                        pSearchRes.put(entry.getKey(), entry.getValue());
                     }
                 }
             }

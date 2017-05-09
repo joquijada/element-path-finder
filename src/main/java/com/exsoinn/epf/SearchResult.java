@@ -5,18 +5,18 @@ import java.util.*;
 /**
  * Created by QuijadaJ on 5/3/2017.
  */
-public class SearchResult implements Map<String, String> {
+public class SearchResult implements Map<String, Context> {
 
-    private final Map<String, String> m;
+    private final Map<String, Context> m;
 
-    private SearchResult(Map<String, String> pResult) {
+    private SearchResult(Map<String, Context> pResult) {
         /*
          * Defensively copying passed in Map to enforce immutability.
          */
         m = new HashMap<>(pResult);
     }
 
-    public static SearchResult createSearchResult(Map<String, String> pResult) {
+    public static SearchResult createSearchResult(Map<String, Context> pResult) {
         return new SearchResult(pResult);
     }
 
@@ -41,22 +41,22 @@ public class SearchResult implements Map<String, String> {
     }
 
     @Override
-    public String get(Object pKey) {
+    public Context get(Object pKey) {
         return m.get(pKey);
     }
 
     @Override
-    public String put(String pKey, String pValue) {
+    public Context put(String pKey, Context pValue) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public String remove(Object pKey) {
+    public Context remove(Object pKey) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void putAll(Map<? extends String, ? extends String> pMap) {
+    public void putAll(Map<? extends String, ? extends Context> pMap) {
         throw new UnsupportedOperationException();
     }
 
@@ -71,12 +71,12 @@ public class SearchResult implements Map<String, String> {
     }
 
     @Override
-    public Collection<String> values() {
+    public Collection<Context> values() {
         return new ArrayList<>(m.values());
     }
 
     @Override
-    public Set<Entry<String, String>> entrySet() {
+    public Set<Entry<String, Context>> entrySet() {
         return new HashSet<>(m.entrySet());
     }
 

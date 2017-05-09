@@ -46,16 +46,16 @@ abstract class AbstractContext implements Context {
                                     TargetElements pTargetElements,
                                     Map<String, String> pExtraParams)
             throws IllegalArgumentException{
-        Map<String, String> found = findElement(this, pSearchPath, pFilter, pTargetElements, null, pExtraParams);
+        Map<String, Context> found = findElement(this, pSearchPath, pFilter, pTargetElements, null, pExtraParams);
         return SearchResult.createSearchResult(found);
     }
 
 
-    Map<String, String> findElement(Context pElem,
+    Map<String, Context> findElement(Context pElem,
                                     SearchPath pSearchPath,
                                     Filter pFilter,
                                     TargetElements pTargetElements,
-                                    Map<String, String> pFoundElemVals,
+                                    Map<String, Context> pFoundElemVals,
                                     Map<String, String> pExtraParams)
             throws IllegalArgumentException{
 
@@ -101,8 +101,8 @@ abstract class AbstractContext implements Context {
         /*
          * If "elemEntries" is not NULL, it means we're dealing with a complex structure (I.e. not a primitive)
          * and the current element in the search path has been found at this location of the passed in element to search. Why
-         * am I structuring if() statements like this instead of nesting them? Makes code easier to read and
-         * hence maintain, less nestedness.
+         * am I constructing if() statements like this instead of nesting them? Makes code easier to read and
+         * hence maintain, less nesting which means less indentation.
          */
         if (null != elemEntries) {
             for (Map.Entry<String, Context> elemEntry : elemEntries) {
@@ -162,9 +162,9 @@ abstract class AbstractContext implements Context {
                                 Context pElem,
                                 Filter pFilter,
                                 TargetElements pTargetElements,
-                                Map<String, String> pFoundElemVals,
+                                Map<String, Context> pFoundElemVals,
                                 Map<String, String> pExtraParams) throws IllegalArgumentException {
-        Object elemVal = null;
+        Context elemValToStore = null;
         /*
          * Handle case when element in last node of search path is primitive or another complex structure
          */
@@ -179,24 +179,18 @@ abstract class AbstractContext implements Context {
                 return;
             }
 
-            if (pElem.isPrimitive()) {
-                elemVal = pElem.stringRepresentation();
-            } else {
-                elemVal = pElem.toString();
-            }
-
+            elemValToStore = pElem;
 
             /*
              * The pTargetElems parameter applies only when results contain another complex structure, apply here.
              */
             if (pElem.isRecursible()) {
-                elemVal = filterUnwantedElements(pElem, pTargetElements);
+                elemValToStore = filterUnwantedElements(pElem, pTargetElements);
             }
         } else if (pElem.isArray()) {
             Iterator<Context> itElem = pElem.asArray().iterator();
             List<Object> elemValList = new ArrayList<>();
             itElem.forEachRemaining(elem -> {
-
                 /*
                  * In below if() expressions, if element is *not* a complex structure, then the first part of OR
                  * will be true, and the rest will not get evaluated, as per JVM optimizations of if() statements. But
@@ -214,20 +208,27 @@ abstract class AbstractContext implements Context {
                     elemValList.add(elem.toString());
                 }
             });
+
+            /*
+             * In the SearchResult we can only store a Context. The below is a lame attempt
+             * to try to convert the array-like structure to a Context object, just so that we're able to obey
+             * the contract of SearchResult. As long as the factory can find a suitable API to handle this,
+             * thenI guess it should be OK.
+             */
             if (!elemValList.isEmpty()) {
-                elemVal = elemValList;
+                elemValToStore = ContextFactory.INSTANCE.obtainContext(elemValList);
             }
         } else {
             throw new IllegalArgumentException("One of the elements to search is of type not currently supported."
                     + "Element name/type is " + pElemName + "/" + pElem.getClass().getName());
         }
 
-        if (null != elemVal) {
+        if (null != elemValToStore) {
             /*
              * TODO: The below is effectively changing a List to a String, and storing it in Map, if the above found an
              * array structure. Re-visit.
              */
-            pFoundElemVals.put(pElemName, elemVal.toString());
+            pFoundElemVals.put(pElemName, elemValToStore);
             handleSingleComplexObjectFound(pFoundElemVals, pTargetElements);
         }
     }
@@ -252,18 +253,66 @@ abstract class AbstractContext implements Context {
      * @param pSearchRes
      * @param pTargetElems
      */
-    abstract void handleSingleComplexObjectFound(Map<String, String> pSearchRes, Set<String> pTargetElems);
+    abstract void handleSingleComplexObjectFound(Map<String, Context> pSearchRes, Set<String> pTargetElems);
 
 
     /**
-     * The implementation of this method provided by child classes should provide data format specific logic to
-     * handle {@link Filter} <code>pFilter</code> param. The {@link Filter} is to be applied once the last node of
-     * the search path is located, and the node is an array of complex objects, to filter out nodes not wanted in the
-     * final search results.
+     * Contains logic to handle {@link Filter} <code>pFilter</code> param. The {@link Filter} is nothing more than
+     * a list of name/value pairs used to arrive at the node to be selected from a list of available nodes, when the
+     * field found, as per the last node in the search path,  is of type array. Note that the field names in the
+     * {@link Filter} can also themselves be search paths, specified in string format using dot deparated token
+     * notation, for example:
+     *
+     * field1.field2
+     *
+     * This is meant to filter nodes on fields which one or more level down in the node itself.
+     *
      * @param pElem
      * @param pFilter
      * @return
      */
-    abstract boolean shouldExcludeFromResults(Context pElem, Filter pFilter);
+    boolean shouldExcludeFromResults(Context pElem, Filter pFilter)
+            throws IllegalArgumentException {
+        if (null == pFilter) {
+            return false;
+        }
+
+        Set<Map.Entry<String, String>> filterEntries = pFilter.entrySet();
+        for (Map.Entry<String, String> filterEntry : filterEntries) {
+            boolean elemToFilterOnIsNested = filterEntry.getKey().indexOf('.') >= 0;
+
+            if (elemToFilterOnIsNested) {
+                /*
+                 * Handles case when the value we want to filter on is buried one or more levels deeper than the
+                 * found element.
+                 * We leverage findElement(), which accepts a dot (.) separated element search path. Also, we support only filtering
+                 * on primitive values, therefore assume that the found element will be a single name value pair.
+                 * If the path of the filter element is not found, IllegalArgumentException is thrown.
+                 * TODO: Handle when trying to filter on array type based on some value inside the array.
+                 */
+                SearchPath elemSearchPath = SearchPath.valueOf(filterEntry.getKey());
+                if (!pElem.containsElement(elemSearchPath.get(0))) {
+                    return true;
+                }
+                Map<String, Context> filterElemFound = findElement(pElem, elemSearchPath, null, null, null, null);
+                Set<Map.Entry<String, Context>> entries = filterElemFound.entrySet();
+                Context filterVal = entries.iterator().next().getValue();
+                if (null == filterVal) {
+                    throw new IllegalArgumentException("The filter element value specified was not found off of this node: " +
+                            filterEntry.getKey());
+                }
+
+                if (!filterVal.stringRepresentation().equals(filterEntry.getValue())) {
+                    return true;
+                }
+            } else {
+                Context elem = pElem.memberValue(filterEntry.getKey());
+                if (null != elem && !elem.toString().equals(filterEntry.getValue())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
 }
