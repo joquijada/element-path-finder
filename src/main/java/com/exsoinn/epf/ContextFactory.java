@@ -4,6 +4,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 
+import java.util.List;
+
 /**
  * Created by QuijadaJ on 5/3/2017.
  */
@@ -26,6 +28,8 @@ public enum ContextFactory {
             throws IllegalArgumentException {
         JsonElement je = convertToJson(pData);
         if (null != je) {
+            return new JsonContext(je);
+        } else if (pData instanceof List && null != (je = convertToJson(pData.toString()))) {
             return new JsonContext(je);
         } else {
             throw new IllegalArgumentException("Passed in argument not recognized as one of the supported formats: " + pData);

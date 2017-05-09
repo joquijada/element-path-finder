@@ -29,7 +29,6 @@ public class ContextTest {
     private static final String verOrgXml = TestData.verOrgXml;
     private static final String jsonStr = TestUtils.convertXmlToJson(verOrgXml);
     private static final Context context = ContextFactory.INSTANCE.obtainContext(jsonStr);
-    private static final JsonParser jsonParser = new JsonParser();
 
 
     @Test
@@ -39,16 +38,16 @@ public class ContextTest {
     }
 
     @Test
-    public void canSearchJson() {
+    public void canSearch() {
         String key = "REGN_NBR_CD";
         SearchPath sp = SearchPath.valueOf(searchPath1);
         SearchResult searchRes = context.findElement(sp, null, null, null);
-        assertTrue(searchRes.containsKey(key) && "15336".equals(searchRes.get(key)));
+        assertTrue(searchRes.containsKey(key) && "15336".equals(searchRes.get(key).stringRepresentation()));
     }
 
 
     @Test
-    public void canSearchJsonWithArrayElementInSearchPath() {
+    public void canSearchWithArrayElementInSearchPath() {
         String key = "NME_ENTR";
         SearchPath sp = SearchPath.valueOf(searchPath2);
         SearchResult sr = context.findElement(sp, null, null, null);
@@ -56,7 +55,7 @@ public class ContextTest {
     }
 
     @Test
-    public void canSearchJsonWithArrayElementInSearchPathThatIsNotLastNode() {
+    public void canSearchWithArrayElementInSearchPathThatIsNotLastNode() {
         String key = "NME_ENTR_VW";
         SearchPath sp = SearchPath.valueOf(searchPath3);
         SearchResult searchRes = context.findElement(sp, null, null, null);
@@ -77,7 +76,7 @@ public class ContextTest {
 
 
     @Test
-    public void canSearchJsonUsingFilter() {
+    public void canSearchUsingFilter() {
         String key = "CAND_REF";
         String filterFld1 = "CAND_RNK";
         String filterVal1 = "1";
@@ -89,15 +88,15 @@ public class ContextTest {
         SearchResult sr = context.findElement(sp, f, null, null);
 
         assertTrue(sr.containsKey(key));
-        JsonArray elem = (JsonArray) jsonParser.parse(sr.get(key));
-        JsonObject jo = (JsonObject) elem.get(0);
-        assertEquals(jo.get(filterFld1).toString(), filterVal1);
-        assertEquals(jo.get(filterFld2).toString(), filterVal2);
+        Context elem = sr.get(key);
+        Context aryEnt = elem.entryFromArray(0);
+        assertEquals(aryEnt.memberValue(filterFld1).toString(), filterVal1);
+        assertEquals(aryEnt.memberValue(filterFld2).toString(), filterVal2);
     }
 
 
     @Test
-    public void canSearchJsonUsingNestedFilter() {
+    public void canSearchUsingNestedFilter() {
         String key = "ADR_ENTR";
         String expectedElemName = "STD_STRG_VW";
         String expectedSubElemName = "STDN_APPL_CD";
@@ -108,12 +107,11 @@ public class ContextTest {
         SearchResult sr = context.findElement(sp, f, null, null);
 
         assertTrue(sr.containsKey(key));
-        JsonArray elem = (JsonArray) jsonParser.parse(sr.get(key));
-        JsonObject jo = (JsonObject) elem.get(0);
-        assertTrue(null != jo && jo.has(expectedElemName));
-        JsonObject subJo = (JsonObject) jo.get(expectedElemName);
-        assertTrue(null != subJo && filterVal1.equals(subJo.get(expectedSubElemName).getAsString()));
-
+        Context elem = sr.get(key);
+        Context aryEnt = elem.entryFromArray(0);
+        assertTrue(null != aryEnt && aryEnt.containsElement(expectedElemName));
+        Context subCtx = aryEnt.memberValue(expectedElemName);
+        assertTrue(null != subCtx && filterVal1.equals(subCtx.memberValue(expectedSubElemName).stringRepresentation()));
     }
 
 
@@ -132,9 +130,9 @@ public class ContextTest {
 
         SearchPath sp = SearchPath.valueOf(searchPath6);
         SearchResult sr = context.findElement(sp, null, t, null);
-        JsonObject elem = (JsonObject) jsonParser.parse(sr.get(key));
-        assertNotNull(elem.get(elemName1));
-        assertNotNull(elem.get(elemName2));
+        Context elem = sr.get(key);
+        assertNotNull(elem.memberValue(elemName1));
+        assertNotNull(elem.memberValue(elemName2));
         assertEquals(2, elem.entrySet().size());
     }
 
@@ -151,6 +149,18 @@ public class ContextTest {
         SearchResult sr = context.findElement(sp, null, t, null);
         assertTrue(sr.size() == 1);
         assertTrue(sr.containsKey(elemName1));
-        assertTrue(sr.get(elemName1).equals("24099"));
+        assertTrue(sr.get(elemName1).stringRepresentation().equals("24099"));
+    }
+
+    @Test
+    public void searchReturnsArray() {
+        String key = "CAND_REF";
+
+        SearchPath sp = SearchPath.valueOf(searchPath4);
+        SearchResult sr = context.findElement(sp, null, null, null);
+
+        assertTrue(sr.containsKey(key));
+        assertTrue(sr.get(key).isArray());
+        assertTrue(sr.get(key).asArray().size() == 8);
     }
 }
