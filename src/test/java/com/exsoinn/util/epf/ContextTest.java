@@ -33,13 +33,13 @@ public class ContextTest {
             = "VER_ORG.VERORG_MSGSV1.VERORG_TRN.VERORG_MSG.BUS_ADR.ADR_ENTR||ADR_USG_CD=1114;STD_STRG_VW.STDN_APPL_CD=13135||ADR_ENTR_VW.POST_CODE";
 
     private static final String verOrgXml = TestData.verOrgXml;
-    private static final String jsonStr = TestUtils.convertXmlToJson(verOrgXml);
+    private static final String  jsonStr = TestUtils.convertXmlToJson(verOrgXml);
     private static final Context context = ContextFactory.INSTANCE.obtainContext(jsonStr);
 
 
     @Test
     public void obtainJsonContext() {
-        Context c = ContextFactory.INSTANCE.obtainContext(jsonStr);
+        Context c = ContextFactory.obtainContext(jsonStr);
         assertTrue(c instanceof JsonContext);
     }
 
@@ -976,5 +976,9 @@ public class ContextTest {
         params.put(Context.IGNORE_INCOMPATIBLE_TARGET_ELEMENT_PROVIDED_ERROR, "1");
         sr = c.findElement(sc, params);
         assertTrue(sr.isEmpty());
+
+        sr = ContextFactory.obtainContext(jsonStr).findElement(SelectionCriteria.valueOf("VER_ORG.VERORG_MSGSV1.VERORG_TRN.VERORG_MSG.MTCH_RSLT.CAND_REF||CAND_RNK=1;REGN_STAT_CD=15201||MTCH_GRD_CMPT[0].MTCH_GRD_CMPT_SCR"),
+                null);
+        assertEquals("{MTCH_GRD_CMPT_SCR=100}", sr.toString());
     }
 }

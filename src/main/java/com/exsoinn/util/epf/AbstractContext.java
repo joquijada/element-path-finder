@@ -380,11 +380,6 @@ abstract class AbstractContext implements Context {
                 continue;
             }
             SearchPath sp = SearchPath.valueOf(e);
-            if (!pElem.containsElement(sp.get(0))) {
-                IncompatibleSearchPathException ispe = new IncompatibleSearchPathException(sp, sp.get(0), pElem);
-                throw new IllegalArgumentException(ispe);
-            }
-
             SearchResult sr = pElem.findElement(sp, null, null, pExtraParams);
 
             if (null == sr || sr.size() != 1) {
