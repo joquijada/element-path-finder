@@ -213,7 +213,8 @@ abstract class AbstractContext implements Context {
              * In the SearchResult we can only store a Context. The below is a lame attempt
              * to try to convert the array-like structure to a Context object, just so that we're able to obey
              * the contract of SearchResult. As long as the factory can find a suitable API to handle this,
-             * thenI guess it should be OK.
+             * then I guess it should be OK - all the client code cares about is having a Context object with methods
+             * that behave correctly.
              */
             if (!elemValList.isEmpty()) {
                 elemValToStore = ContextFactory.INSTANCE.obtainContext(elemValList);
