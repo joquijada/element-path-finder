@@ -3,7 +3,7 @@ classes
 .settings
 target
 .project
-*.iml
+#*.iml
 .idea
 .travis.yml
 .npmignore
