@@ -4,6 +4,6 @@ classes
 target
 .project
 #*.iml
-.idea
+#.idea
 .travis.yml
 .npmignore
