@@ -657,8 +657,8 @@ public class ContextTest {
                 "      </offer>\n" +
                 "    </pricing-model>";
 
-        Context c = ContextFactory.INSTANCE.obtainContext(xml);
-        System.out.println(c.stringRepresentation());
+        Context c = ContextFactory.obtainContext(xml);
+        assertTrue(null != c);
     }
 
 
