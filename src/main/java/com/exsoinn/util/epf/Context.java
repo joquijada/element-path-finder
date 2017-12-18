@@ -36,14 +36,14 @@ public interface Context {
      * to the node of interest, represented by a {@link SearchPath}.
      * The {@link Context} object off of which this method can be invoked was previously obtained via a call to factory
      * method {@link ContextFactory#obtainContext(Object)}.
-     * To further refine the results use the {@param pFilter} and {@param pTargetElements} arguments.
+     * To further refine the results use the pFilter and pTargetElements arguments.
      * TODO: Add more examples of usage
      * @param pSearchPath - The path that in the underlying data structure that this method has been instructed to find. For more
      *                    information on how to build a {@code SearchPath} object to then pass it here, read the documentation
      *                    of {@link SearchPath#valueOf(String)}.
      *                    Basically the last node of the <code>SearchPath</code> is what gets returned to the caller. This can be
      *                    a primitive, and array (of primitives, or other complex structures, or a combination thereof), or a complex
-     *                    data structure. The type of the found element determines how the {@param pFilter} and {@param pTargetElements}
+     *                    data structure. The type of the found element determines how the pFilter and pTargetElements
      *                    arguments behave. Read respective description of these arguments for more details.
      *                    If an array element will be
      *                    encountered somewhere in the search path, then the corresponding node should contain square
@@ -125,7 +125,7 @@ public interface Context {
      *
      *
      * @param pTargetElements - Use it to further refine the search results by specifying which elements to return in the search
-     *                        results when the last node of the {@param pSearchPath} yields a complex data structure, and you're only
+     *                        results when the last node of the pSearchPath yields a complex data structure, and you're only
      *                        interested in a sub-set of the members of the found complex data structure.
      * @param pExtraParams - Implementing classes can use this {@link Map} to provide arbitrary list of name/value
      *                     pairs to provide features/behavior that this interface does not already plan for.
@@ -145,54 +145,54 @@ public interface Context {
     /**
      * Works similar to {@link Context#findElement(SearchPath, Filter, TargetElements, Map)}, except that the first three
      * arguments are replaced with a {@link SelectionCriteria} element.
-     * @param pSelectCriteria
-     * @param pExtraParams
-     * @return
-     * @throws IllegalArgumentException
+     * @param pSelectCriteria - pSelectCriteria
+     * @param pExtraParams - pExtraParams
+     * @return - TODO
+     * @throws IllegalArgumentException - TODO
      */
     SearchResult findElement(SelectionCriteria pSelectCriteria,
                              Map<String, String> pExtraParams) throws IllegalArgumentException;
     /**
      * Implementing classes use this method to tell if underlying data is a primitive (I.e. long, int, double,
      * {@link String}, etc...
-     * @return
+     * @return - TODO
      */
     boolean isPrimitive();
 
 
     /**
      * Implementing classes use this method to tell if underlying data is complex (I.e. not a primitive).
-     * @return
+     * @return - TODO
      */
     boolean isRecursible();
 
     /**
      * Implementing classes use this method to tell if underlying data is a type of array or list-like.
-     * @return
+     * @return - TODO
      */
     boolean isArray();
 
     /**
      * Meant for use only {@link #isArray()} is true, will return a {@link List} of the underlying array-like
      * structure.
-     * @return
-     * @throws IllegalStateException
+     * @return - TODO
+     * @throws IllegalStateException - TODO
      */
     List<Context> asArray() throws IllegalStateException;
 
 
     /**
      * If the underlying data is array-like, will retrieve entry at index <code>pIdx</code>
-     * @param pIdx
-     * @return
-     * @throws IllegalStateException
+     * @param pIdx - pIdx
+     * @return - TODO
+     * @throws IllegalStateException - TODO
      */
     Context entryFromArray(int pIdx) throws IllegalStateException;
 
     /**
-     * If the underlying data provides implementation aside from the {@link #toString} to return the data as a string,
+     * If the underlying data provides implementation aside from the toString() to return the data as a string,
      * then this method is expected to wrap such an implmentation.
-     * @return
+     * @return - TODO
      */
     String stringRepresentation();
 
@@ -200,9 +200,9 @@ public interface Context {
     /**
      * To be used only when the underlying data is complex, returns true if underlying data contains the
      * <code>pElemName</code> given
-     * @param pElemName
-     * @return
-     * @throws IllegalStateException
+     * @param pElemName - pElemName
+     * @return - TODO
+     * @throws IllegalStateException - TODO
      */
     boolean containsElement(String pElemName) throws IllegalStateException;
 
@@ -211,17 +211,17 @@ public interface Context {
     /**
      * To be used only when the underlying data is complex, returns a {@link Set} of {@link Map.Entry}s
      * to represent the name/value pairs contained int he complex data structure.
-     * @return
-     * @throws IllegalStateException
+     * @return - TODO
+     * @throws IllegalStateException - TODO
      */
     Set<Map.Entry<String, Context>> entrySet() throws IllegalStateException;
 
 
     /**
      * To be used only when the underlying data is complex, returns the value of the specified <code>pMemberName</code>
-     * @param pMemberName
-     * @return
-     * @throws IllegalStateException
+     * @param pMemberName - pMemberName
+     * @return - TODO
+     * @throws IllegalStateException - TODO
      */
     Context memberValue(String pMemberName) throws IllegalStateException;
 
@@ -229,9 +229,9 @@ public interface Context {
     /**
      * When the {@code Context} is an array, checks if the value is contained in it.
      *
-     * @param pVal
-     * @return
-     * @throws IllegalStateException
+     * @param pVal - pVal
+     * @return - TODO
+     * @throws IllegalStateException - TODO
      */
     boolean arrayContains(String pVal) throws IllegalStateException;
 
@@ -265,7 +265,7 @@ public interface Context {
      * because JSON is one the formats recognized by that factory).
      *
      * @param pArg - What will get transformed to a <code>List</code> of <code>String</code>'s, if possible.
-     * @param <T>
+     * @param <T> - T
      * @return - The {@code List} of {@code String}'s produced, if possible, <code>null</code> otherwise
      */
     static <T extends String> List<T> transformArgumentToListObject(T pArg) {

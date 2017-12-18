@@ -109,8 +109,8 @@ public class EscapeUtil {
          * for escaping purposes. If not replacement is found, the passed in
          * string is returned as is.
          *
-         * @param pStr
-         * @return
+         * @param pStr - pStr
+         * @return - TODO
          */
         public static String replacementFromString(String pStr)  {
             for (EscapeToken c: EscapeToken.values()) {
@@ -126,9 +126,9 @@ public class EscapeUtil {
 
 
     /**
-     * Un-escape any special characters contained in {@param pInStr}.
+     * Un-escape any special characters contained in {pInStr.
      * @param pInStr - String to un-escape
-     * @return
+     * @return - TODO
      */
     public static String unescapeSpecialCharacters(String pInStr) {
         /**
@@ -143,9 +143,9 @@ public class EscapeUtil {
 
 
     /**
-     * Escape any special characters contained in {@param pInStr}.
+     * Escape any special characters contained in pInStr.
      * @param pInStr - String to escape
-     * @return
+     * * @return - TODO
      */
     public static String escapeSpecialCharacters(String pInStr) {
         for (EscapeUtil.EscapeToken t : EscapeUtil.EscapeToken.values()) {

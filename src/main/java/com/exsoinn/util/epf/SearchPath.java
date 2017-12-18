@@ -62,8 +62,8 @@ public final class SearchPath implements List<String> {
      * The search path specifies what information in the underlying hierarchical data the caller is interested in finding. Notice in the
      * example above one of the tokens contains square brackets. This is used to indicate if an array-like structure will
      * be encountered somewhere along the search path.
-     * @param pSearchPath
-     * @return
+     * @param pSearchPath - pSearchPath
+     * @return - TODO
      */
     public static SearchPath valueOf(final String pSearchPath) {
         final boolean atEnd = false;
@@ -83,7 +83,7 @@ public final class SearchPath implements List<String> {
      * Traverses the {@code SearchPath} object in circular/modular manner, meaning that when you have reached
      * the last node by advancing, if you invoke {@link SearchPath#advanceToNextNode()} again it will go back
      * to first note. This means you can traverse the {@code SearchPath} object indefinitely.
-     * @return
+     * @return - TODO
      */
     final SearchPath advanceToNextNode() {
         /*

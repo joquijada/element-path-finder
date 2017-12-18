@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 /**
  * Encapsulates a all te information necessary to find data in a {@link Context}. You can build {@link SelectionCriteria}
- * objects by passing a properly formatted {@link @String}, and then invoking factory method
+ * objects by passing a properly formatted String, and then invoking factory method
  * {@link SelectionCriteria#valueOf(String)}. The format is a pipe delimited string with exacty 3 tokens, one each corresponding
  * to, and in the same order, to a: {@link SearchPath}, {@link Filter} and {@link TargetElements}.
  * Refer to each individual class for details on the format for each.

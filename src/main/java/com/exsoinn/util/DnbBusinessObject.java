@@ -9,7 +9,7 @@ public interface DnbBusinessObject {
     /**
      * For different objects the this method can have a different meaning. For example, if an implementing class
      * happens to also be a child of {@link java.util.Map}, then it will automatically implement this method.
-     * @return
+     * @return - Foo
      */
     boolean isEmpty();
 }
