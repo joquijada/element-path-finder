@@ -45,6 +45,7 @@
 
 
     <build>
+
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -61,7 +62,12 @@
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
                 </configuration>
-            </plugin>
+	</plugin>
+        <plugin>
+        <groupId>com.exsoinn</groupId>
+        <artifactId>code-quality-maven-plugin</artifactId>
+	<extensions>true</extensions>
+        </plugin>
         </plugins>
     </build>
 
