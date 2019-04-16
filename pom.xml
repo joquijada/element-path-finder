@@ -7,7 +7,7 @@
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
   <name>element-path-finder</name>
-  <url>http://github.com/joquijada/element-path-finder</url>
+  <url>https://github.com/joquijada/element-path-finder</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -69,8 +69,11 @@
         <artifactId>code-quality-maven-plugin</artifactId>
         <extensions>true</extensions>
         <configuration>
-          <scmUrl>scm:git:https://joquijada:Latambora1@github.com/joquijada/element-path-finder.git</scmUrl>
-          <uploadSite>true</uploadSite>
+          <scmUrl>scm:git:https://github.com/joquijada/element-path-finder.git</scmUrl>
+          <siteUpload>true</siteUpload>
+          <sitePath>site-epf</sitePath>
+          <siteMerge>false</siteMerge>
+          <packageNames>com.exsoinn.*</packageNames>
         </configuration>
       </plugin>
     </plugins>
