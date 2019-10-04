@@ -1,0 +1,39 @@
+# See https://github.com/SonarSource/sq-com_example_java-maven-travis/blob/master/.travis.yml,
+# a lot of what you see here borrowed from there. I got that URL from
+# this page:
+# https://docs.travis-ci.com/user/sonarcloud/
+language: java
+
+stages:
+  - test
+  - report
+
+
+addons:
+  sonarcloud:
+    organization: "joquijada-github"
+
+
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+    - '$HOME/.sonar/cache'
+
+
+
+# Need to define the `test` stage here, else nothing runs in Travis CI.
+# Maybe my understanding of things is wrong, but I thought the `test`
+# stage is the default and always runs, hence no need to explicitly define
+# anywhere. Oh well at least I got it to work.
+jobs:
+  include:
+    - stage: test
+      # This stage runs for all branches
+      name: Test the Code
+      script: mvn clean install -P coverage
+    - stage: report
+      # Report only on the master branch
+      name: Report Code Quality
+      script: mvn sonar:sonar
+      if: branch = master
+
