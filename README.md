@@ -1,5 +1,9 @@
 # element-path-finder
 
+[![Build Status](https://travis-ci.com/joquijada/element-path-finder.svg?branch=master)](https://travis-ci.com/joquijada/element-path-finder)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=joquijada_element-path-finder&metric=alert_status)](https://sonarcloud.io/dashboard?id=joquijada_element-path-finder)
+
+
 # Consistent API for searching disparate data formats
 
 By leveraging the Adapter and Factory design patterns in Java, this project makes it possible to decouple a client from the underlying format of the data it wishes search on.  This project provides a way to wrap a data object of some format (E.g. JSON, XML, etc...), inside another object of type Context, which provides consistent API interface to search the underlying data object. The only work involved is creating a child class of AbstractContext.java in order to handle other data formats. Currently the project only provides an implementation for handling JSON, in JsonContext.java, and by using 3rd party Google JSON API (see "https://google.github.io/gson/apidocs/").
