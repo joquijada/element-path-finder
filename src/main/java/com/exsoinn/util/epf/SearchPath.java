@@ -275,7 +275,7 @@ public final class SearchPath implements List<String> {
 
     private static List<String> parseElementSearchPath(String pElemSearchPath) {
         String[] nodes = pElemSearchPath.split("\\.");
-        return Arrays.stream(nodes).collect(Collectors.toCollection(() -> new ArrayList(nodes.length)));
+        return Arrays.stream(nodes).collect(Collectors.toCollection(() -> new ArrayList<>(nodes.length)));
     }
 
     boolean isAtEndOfSearchPath() {

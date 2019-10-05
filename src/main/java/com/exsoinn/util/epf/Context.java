@@ -280,8 +280,8 @@ public interface Context {
                             + pArg);
                 }
                 errorParsingCtx = false;
-                return ctxAry.stream().map(e -> e.stringRepresentation()).
-                        collect(Collectors.toCollection(() -> new ArrayList()));
+                return (List<T>) ctxAry.stream().map(e -> e.stringRepresentation()).
+                        collect(Collectors.toCollection(() -> new ArrayList<>()));
             }
         } catch (Exception ignore) {
             // Ignore
@@ -291,7 +291,7 @@ public interface Context {
                  * One last ditch attempt at converting argument to a list
                  */
                 if (pArg.indexOf(",") > 0) {
-                    return Arrays.stream(pArg.split(",")).collect(Collectors.toCollection(() -> new ArrayList()));
+                    return (List<T>) Arrays.stream(pArg.split(",")).collect(Collectors.toCollection(() -> new ArrayList<>()));
                 }
             }
         }

@@ -5,7 +5,12 @@
 language: java
 
 jdk:
-  - oraclejdk9
+  - openjdk8
+  - openjdk9
+  - openjdk10
+  - openjdk11
+  - openjdk12
+  - openjdk13
 
 stages:
   - test
