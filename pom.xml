@@ -71,7 +71,7 @@
           </descriptorRefs>
         </configuration>
       </plugin>
-      <!--Disable until CQMP deployed in Maven central<plugin>
+      <plugin>
         <groupId>com.exsoinn</groupId>
         <artifactId>code-quality-maven-plugin</artifactId>
         <extensions>true</extensions>
@@ -82,7 +82,7 @@
           <siteMerge>false</siteMerge>
           <packageNames>com.exsoinn.*</packageNames>
         </configuration>
-      </plugin>-->
+      </plugin>
     </plugins>
   </build>
   <profiles>
