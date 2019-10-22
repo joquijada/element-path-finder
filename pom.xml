@@ -74,6 +74,7 @@
       <plugin>
         <groupId>com.exsoinn</groupId>
         <artifactId>code-quality-maven-plugin</artifactId>
+        <version>1.0-SNAPSHOT</version>
         <extensions>true</extensions>
         <configuration>
           <scmUrl>scm:git:https://github.com/joquijada/element-path-finder.git</scmUrl>
