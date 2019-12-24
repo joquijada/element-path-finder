@@ -1,47 +1,46 @@
-# See https://github.com/SonarSource/sq-com_example_java-maven-travis/blob/master/.travis.yml,
-# a lot of what you see here borrowed from there. I got that URL from
-# this page:
-# https://docs.travis-ci.com/user/sonarcloud/
-language: java
-
-jdk:
-  - openjdk8
-  - openjdk9
-  - openjdk10
-  - openjdk11
-  - openjdk12
-  - openjdk13
-
-stages:
-  - test
-  - report
-
-
-addons:
-  sonarcloud:
-    organization: "joquijada-github"
-
-
+before_install:
+- chmod 777 cd/before-deploy.sh
+- cd/before-deploy.sh
 cache:
   directories:
-    - '$HOME/.m2/repository'
-    - '$HOME/.sonar/cache'
-
-
-
-# Need to define the `test` stage here, else nothing runs in Travis CI.
-# Maybe my understanding of things is wrong, but I thought the `test`
-# stage is the default and always runs, hence no need to explicitly define
-# anywhere. Oh well at least I got it to work.
+  - "$HOME/.m2/repository"
+  - "$HOME/.yarn-cache"
+  - "$HOME/.sonar/cache"
+language: java
+install: true
+jdk:
+- openjdk8
+- openjdk9
+- openjdk10
+- openjdk11
+- openjdk12
+- openjdk13
+stages:
+- test
+- deploy
+addons:
+  sonarcloud:
+    organization: joquijada-github
 jobs:
   include:
-    - stage: test
-      # This stage runs for all branches
-      name: Test the Code
-      script: mvn clean install -P coverage
-    - stage: report
-      # Report only on the master branch
-      name: Report Code Quality
-      script: mvn sonar:sonar
-      if: branch = master
-
+  - stage: test
+    name: Test the Code
+    script: mvn clean package -P coverage sonar:sonar
+    if: type IN (push, pull_request)
+  - stage: deploy
+    name: Deploy to Maven Repo
+    script:
+    - yarn global add https://github.com/conveyal/maven-semantic-release.git#e5551beb4ec266bb520ae5ff155bc0d04acf8f05
+      semantic-release@15
+    - mvn package -Dmaven.test.skip=true
+    - semantic-release --prepare @conveyal/maven-semantic-release --publish @semantic-release/github,@conveyal/maven-semantic-release
+      --verify-conditions @semantic-release/github,@conveyal/maven-semantic-release
+      --verify-release @conveyal/maven-semantic-release --use-conveyal-workflow
+    if: branch = master
+sudo: false
+env:
+  global:
+  - secure: NUuyKVcEdBodUPKsdMhgH58JCdU3aIUtY36njyblCvRi+A9JsWzALnML7wFM6Wqjx2iByVe+Jv16k6I2742BkYT3YpY+jtV7+xlIxHafAd3G/dhspntpCa1gAVRy6y1JGyoOgD/BV/v8J+gA4RhiYzdBYREKe2DKKKxKre37z0MV/X9Ajf+Leih3KmMywj7WXyH+M7tG94+WKASgHEBu2/CFaDpLqM96rSBhofVAAshbmNMH1RnSmKlxq2Da9nVhBtVkPBiym58E6PAl8kAMHRSBzyXWB0yKbvF2Tgqd2uZIteruh44hoCzNcqDTAB6ZRYGhqZLxbpWODoGTsCCnde52OIMdMHZ0WMaAf5soWXq+K9W+sj91Rb9gPUzV8bIf8Np6ehjdblOgpWcnAF+Jr3Mf2NDcgHi0bX3UjpgyOyo9Xu967+NdY6e97V4A3YgIzkD5emGonQfYkdEzL+wBaNTBUd2PT7NBz1RaD/56zhm7141dtnGuF1QqMPVgXFBJuBo5GNtapaZoqkxBiS86mWuZskRUw1XyBgicF0wJobHWPfwJzoKbjJCsgv+p+Dp0n0XaNBF/vpk73i4JT49NRLFUtrjeNt4uD97bTwMTD9+UysztmefgLzwUqPbUbzRab+6t8PtDWqXjNIsVMzSGQGNUJ3zLLG/cXc3fMFNRxHE=
+  - secure: ZupeA6qgzE4wTBjn0tvAcQRbIuHeSRR2gOnwHInODniBf1qGKJUuqiyoQtnEn7EzblT7gEJOA7JxnBRYy/E91EXX0bELyX601VQORujAFCb9QyTuY+zIVAiSEmbASq66/eOhWbwunHQ48Oj/sOVYsOmzY48fW0xqnT8nW5oeW6mvVoZo1saCTaaJKMnVStnwyaKF+kRTSNfswRk61RnXDZ+UQxTrlqf4Ws7AWAV6jxyvS9Fs3caEErN0WrJ+buwKiCH7nl4Vs9bun7odxkQUFXRWi2iK4Jqu7PRh4Jzb/b+MnhC8h8bEc8UVUqdpk6AGtnyYDGQENJrG6n2UL+HpgAf//dD7J982eWKWxA4wA6bqtw9hfKOz56xgQ4YTvg82uIFP/KdLTH3momRQUg3Qbjw1pUmayHf1eMehdpMLQMgvSnr4j9nWgs5KRLNaPgOU9i9ILW0pBizYwNWpmuE48C6cx0wbBdIuB+aWnQR5x3xBP1ZlN9kwcPc8+/93q90sW3K1BMBgbPBXj/AIaJJlBkVlj49n0oiHSdyFO4OZ5jxXorryZwApijswqVLKzijvF/w3kbCF94ItijzHXKwPk60KBLkUXMNuqU7ABP8B+GKOGUeYILohtkOCWxBojhgyqhBCToRH7/vaql0C6zZF9JAE+DgGs+dJeGL7cSqPiHE=
+  - secure: hIDOE3WEsHSzanpEkRg7wY+ZbC5v/KOpt1UjyuvYHVU29rqBJRCS1XSOJuNgmxABbGNOawiXBBhMg51jng29cn3tHNPeTN2jFPQTiZ9dxrgslMU+QWxeTzG7cBN1grVrcOEIvOQ8OEhochCiKj4Egh2N5jndLfEd9PWhb3GiK2WsK2S5Kr/50y8xGnaqZkZ4RPdP9xMHM1ZF9XIFI1XpeIzv6IyiKTVJQyB+40SDdgAa/IkB6dIKvcHl03mQ/bkenuJY0QwxpPTObZ9JQZVo1+K+oLF6KTalj2mehq2NoMZ7u3XBElt+naTgIlWtK9Db3/p1ckghbli4VfYQOHgbQFVPhCLex61NN+Xfp/uuvpbZK+AIZKOr3FLPR8c25sNs7iei80FsaiQeftSUy4KzxakhOArPWQHKiadcTvHYI9Lkuj2WOkKVuwA/zi6ev0LA8HywJoCEmtSHZ4mbJKiv4X219FVolDzmnC2ZfWNDUy1uZ3yRstAOqFayJ/LTcOIlAfiqsA4UsgCUaZbDt4VXCdB1QMazJKFmXcT7V0T2lMBOLsaF/Jk7RipbTTdTBZCn5UxPYRSr5O5ZgY/JSZnGyRsbOoaCkKYlfYeQRPYsgAVgxTLRxd3A5xuqrDALmTjUVHf69qujjFXbACzBRY4ZJK/uBPa+MBW+9Shz+e/V55I=
+  - secure: bhJBi0JWV5PG3zS2iDAGpKiizOoUX0i4HVjaPhP1iMeyulNprAEhKMEpex2p6STZJqf3dniF4XP5o8bGS6+u0YC337anankobiUrlfYVb4NnT/vnVBPEQXpxwO1iydbnAqqNl95UoEBYtFsvvUWX3eeVPTbi/z1q3RioF3M0PBwpelAk6jyWUb8HXzq9Db2SBHPrvmP/Vi0TwrgjZ0PaXrGhvdXgmplDd02vQSkuBemE75sEya7Zw3Vle8b8V2gVSbfJbS+cjJDYnABekwPD8r7nvQnKS5R5kyHbW36VKx1evV/uK814h+8sC+y/k31rAzg16Gih0Tnc3aDOidk03Wqrimpo9at+zNhtdlf0crOwGJiLTHI+Om4kRwQu/MIsrfdfV+hbtPreU7OoUfYQn1OpamJV41ILwcK67t2T1aUm3hEDxXo7rZO24UUkADU+Us+hNjmawXSonR1kaBiV0/YrK5iIYefedwCAK2k9n17GYrXR9DgC32/jBCfV0VyCrS0OpaoQymBh420OAr70LhL7dqBmZA9wJxdxOgsjokE7JynLXlnDkN/oQ2QWOBEFT3UhrzRHCOP6YxZ6hI+7Y0I1AbV4wCQEsIdy6phsnnkoQIMVXvMPFFPdKvY5f6VS5y2lxdCxmKRfaNI23bNa3zo9BsvbeOzI7BpVYCHQri4=
