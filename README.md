@@ -16,4 +16,4 @@ Currently the factory can handle only JSON in either string format or an already
 # Examples
 First thing you'd want to do is to wrap the client's data in a Context object. You do this by invoking factory method ContextFactory.INSTANCE.obtainContext(<raw data>). Only JSON data, either a java.lang.String or an already created com.google.gson.JsonElement object, will be recognized. Anything else will throw exception, because implementations to handle other data formats are not available yet.
 
-To search for an element, examples will be provided soon.
+A good way to familiarize yourself with the API is by looking at the test cases written
